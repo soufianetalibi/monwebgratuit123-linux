@@ -27,3 +27,6 @@ az webapp deployment source config \
     --repo-url https://github.com/soufianetalibi/monwebgratuit123-linux \
     --branch PPRD \
     --manual-integration
+
+Et vérifier le déploiement : 
+az webapp browse --name monwebgratuit123-linux-PPRD --resource-group rg-webpp-gratuit-linux-PPRD
