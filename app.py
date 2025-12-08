@@ -39,7 +39,7 @@ AZURE_CONFIG = {
     'client_id': os.getenv('AZURE_CLIENT_ID'),
     'client_secret': os.getenv('AZURE_CLIENT_SECRET'),
     'authority': f"https://login.microsoftonline.com/{os.getenv('AZURE_TENANT_ID')}",
-    'redirect_uri': os.getenv('REDIRECT_URI', 'https://monwebgratuit123-linux.azurewebsites.net/getAToken'),
+    'redirect_uri': os.getenv('REDIRECT_URI', 'https://monwebgratuit123-linux.azurewebsites.net/.auth/login/aad/callback'),
     'scope': ['User.Read']
 }
 
