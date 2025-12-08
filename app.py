@@ -61,13 +61,132 @@ def login_required(f):
     return decorated_function
 
 # Templates HTML
-BASE_TEMPLATE = """
+LOGIN_PAGE = """
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Application Azure AD{% endblock %}</title>
+    <title>Connexion - Application Azure AD</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .card {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+        
+        .card p {
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .feature-item {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .feature-item h4 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-item p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>👋 Bienvenue</h2>
+        <p>Connectez-vous avec votre compte Microsoft Azure AD pour accéder à l'application.</p>
+        
+        <div class="feature-grid">
+            <div class="feature-item">
+                <h4>🔒 Sécurisé</h4>
+                <p>Authentification via Azure AD</p>
+            </div>
+            <div class="feature-item">
+                <h4>⚡ Moderne</h4>
+                <p>Interface responsive</p>
+            </div>
+            <div class="feature-item">
+                <h4>🚀 Rapide</h4>
+                <p>Connexion en un clic</p>
+            </div>
+        </div>
+        
+        <div style="margin-top: 2rem;">
+            <a href="{{ auth_url }}" class="btn">Se connecter avec Microsoft</a>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+DASHBOARD_PAGE = """
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de bord</title>
     <style>
         * {
             margin: 0;
@@ -121,7 +240,7 @@ BASE_TEMPLATE = """
             padding: 3rem;
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 500px;
+            max-width: 700px;
             width: 100%;
             text-align: center;
         }
@@ -200,7 +319,7 @@ BASE_TEMPLATE = """
         
         .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 1.5rem;
             margin-top: 2rem;
         }
@@ -225,92 +344,52 @@ BASE_TEMPLATE = """
     </style>
 </head>
 <body>
-    {% if session.user %}
     <nav class="navbar">
         <h1>🔐 Mon Application</h1>
         <div class="user-info">
-            <span class="user-name">{{ session.user.name }}</span>
-            <a href="{{ url_for('logout') }}" class="btn btn-secondary">Déconnexion</a>
+            <span class="user-name">{{ user.name }}</span>
+            <a href="{{ logout_url }}" class="btn btn-secondary">Déconnexion</a>
         </div>
     </nav>
-    {% endif %}
     
     <div class="container">
-        {% block content %}{% endblock %}
+        <div class="card">
+            <div class="user-card">
+                <h3>👤 Profil utilisateur</h3>
+                <div class="user-details">
+                    <p><strong>Nom :</strong> {{ user.name }}</p>
+                    <p><strong>Email :</strong> {{ user.preferred_username }}</p>
+                    {% if user.get('job_title') %}
+                    <p><strong>Poste :</strong> {{ user.job_title }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <h2>✨ Tableau de bord</h2>
+            <p>Vous êtes connecté avec succès ! Cette application démontre l'intégration d'Azure AD avec Flask.</p>
+            
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h4>📊 Analyses</h4>
+                    <p>Accédez aux statistiques</p>
+                </div>
+                <div class="feature-item">
+                    <h4>📁 Documents</h4>
+                    <p>Gérez vos fichiers</p>
+                </div>
+                <div class="feature-item">
+                    <h4>⚙️ Paramètres</h4>
+                    <p>Configurez l'application</p>
+                </div>
+                <div class="feature-item">
+                    <h4>👥 Équipe</h4>
+                    <p>Collaborez efficacement</p>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>
-"""
-
-LOGIN_TEMPLATE = """
-{% extends "base.html" %}
-{% block title %}Connexion - Application Azure AD{% endblock %}
-{% block content %}
-<div class="card">
-    <h2>👋 Bienvenue</h2>
-    <p>Connectez-vous avec votre compte Microsoft Azure AD pour accéder à l'application.</p>
-    
-    <div class="feature-grid">
-        <div class="feature-item">
-            <h4>🔒 Sécurisé</h4>
-            <p>Authentification via Azure AD</p>
-        </div>
-        <div class="feature-item">
-            <h4>⚡ Moderne</h4>
-            <p>Interface responsive</p>
-        </div>
-        <div class="feature-item">
-            <h4>🚀 Rapide</h4>
-            <p>Connexion en un clic</p>
-        </div>
-    </div>
-    
-    <div style="margin-top: 2rem;">
-        <a href="{{ auth_url }}" class="btn">Se connecter avec Microsoft</a>
-    </div>
-</div>
-{% endblock %}
-"""
-
-DASHBOARD_TEMPLATE = """
-{% extends "base.html" %}
-{% block title %}Tableau de bord{% endblock %}
-{% block content %}
-<div class="card" style="max-width: 700px;">
-    <div class="user-card">
-        <h3>👤 Profil utilisateur</h3>
-        <div class="user-details">
-            <p><strong>Nom :</strong> {{ session.user.name }}</p>
-            <p><strong>Email :</strong> {{ session.user.preferred_username }}</p>
-            {% if session.user.get('job_title') %}
-            <p><strong>Poste :</strong> {{ session.user.job_title }}</p>
-            {% endif %}
-        </div>
-    </div>
-    
-    <h2>✨ Tableau de bord</h2>
-    <p>Vous êtes connecté avec succès ! Cette application démontre l'intégration d'Azure AD avec Flask.</p>
-    
-    <div class="feature-grid">
-        <div class="feature-item">
-            <h4>📊 Analyses</h4>
-            <p>Accédez aux statistiques</p>
-        </div>
-        <div class="feature-item">
-            <h4>📁 Documents</h4>
-            <p>Gérez vos fichiers</p>
-        </div>
-        <div class="feature-item">
-            <h4>⚙️ Paramètres</h4>
-            <p>Configurez l'application</p>
-        </div>
-        <div class="feature-item">
-            <h4>👥 Équipe</h4>
-            <p>Collaborez efficacement</p>
-        </div>
-    </div>
-</div>
-{% endblock %}
 """
 
 @app.route('/')
@@ -332,7 +411,7 @@ def login():
         redirect_uri=AZURE_CONFIG['redirect_uri']
     )
     
-    return render_template_string(BASE_TEMPLATE + LOGIN_TEMPLATE, auth_url=auth_url, session=session)
+    return render_template_string(LOGIN_PAGE, auth_url=auth_url)
 
 @app.route('/getAToken')
 def get_token():
@@ -358,7 +437,11 @@ def get_token():
 @login_required
 def dashboard():
     """Tableau de bord principal"""
-    return render_template_string(BASE_TEMPLATE + DASHBOARD_TEMPLATE, session=session)
+    return render_template_string(
+        DASHBOARD_PAGE, 
+        user=session.get('user'),
+        logout_url=url_for('logout')
+    )
 
 @app.route('/logout')
 def logout():
