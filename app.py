@@ -9,16 +9,15 @@ from functools import wraps
 # -----------------------------------------------------------------------------
 app = Flask(__name__)
 
-# Clé secrète (obligatoire en production)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
-# Configuration session pour Azure HTTPS
 app.config.update(
     SESSION_TYPE='filesystem',
     SESSION_COOKIE_SECURE=True,
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax'
 )
+
 Session(app)
 
 # -----------------------------------------------------------------------------
@@ -54,12 +53,36 @@ def login_required(f):
     return decorated_function
 
 # -----------------------------------------------------------------------------
-# HTML TEMPLATES
+# HTML PAGES
 # -----------------------------------------------------------------------------
-LOGIN_PAGE = """..."""
-DASHBOARD_PAGE = """..."""
-# ⚠️ IMPORTANT
-# gardez exactement vos templates actuels ici (je ne les enlève pas, juste raccourcis l'affichage)
+LOGIN_PAGE = """
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Connexion</title>
+</head>
+<body style="font-family:Arial;text-align:center;padding-top:5em">
+<h2>Connexion Azure AD</h2>
+<a href="{{ auth_url }}">Se connecter avec Microsoft</a>
+</body>
+</html>
+"""
+
+DASHBOARD_PAGE = """
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard</title>
+</head>
+<body style="font-family:Arial;text-align:center;padding-top:5em">
+<h2>Bienvenue {{ user.name }}</h2>
+<p>{{ user.preferred_username }}</p>
+<a href="{{ logout_url }}">Se déconnecter</a>
+</body>
+</html>
+"""
 
 # -----------------------------------------------------------------------------
 # ROUTES
@@ -91,7 +114,7 @@ def get_token():
     )
 
     if 'error' in result:
-        return f"Erreur Azure AD: {result.get('error_description')}"
+        return f"Erreur Azure AD : {result.get('error_description')}"
 
     session['user'] = result.get('id_token_claims')
     return redirect(url_for('dashboard'))
@@ -108,19 +131,11 @@ def dashboard():
 @app.route('/logout')
 def logout():
     session.clear()
-    logout_url = f"{AZURE_CONFIG['authority']}/oauth2/v2.0/logout"
-    return redirect(logout_url)
+    return redirect(AZURE_CONFIG['authority'] + "/oauth2/v2.0/logout")
 
 # -----------------------------------------------------------------------------
-# APPLICATION STARTUP
+# APP STARTUP
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
-    required = ['AZURE_CLIENT_ID', 'AZURE_CLIENT_SECRET', 'AZURE_TENANT_ID', 'REDIRECT_URI', 'SECRET_KEY']
-    missing = [v for v in required if not os.getenv(v)]
-    if missing:
-        print("❌ VARIABLES MANQUANTES :", missing)
-    else:
-        print("✅ Configuration Azure AD OK")
-
     port = int(os.getenv('PORT', 8000))
     app.run(host='0.0.0.0', port=port)
