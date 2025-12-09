@@ -63,7 +63,7 @@ LOGIN_PAGE = """
 <title>Connexion</title>
 </head>
 <body style="font-family:Arial;text-align:center;padding-top:5em">
-<h2>Connexion Azure AD</h2>
+<h2>Connexion Azure AD en PPRD </h2>
 <a href="{{ auth_url }}">Se connecter avec Microsoft</a>
 </body>
 </html>
@@ -77,7 +77,7 @@ DASHBOARD_PAGE = """
 <title>Dashboard</title>
 </head>
 <body style="font-family:Arial;text-align:center;padding-top:5em">
-<h2>Bienvenue {{ user.name }}</h2>
+<h2>Bienvenue {{ user.name }} sur l'application PPRD</h2>
 <p>{{ user.preferred_username }}</p>
 <a href="{{ logout_url }}">Se déconnecter</a>
 </body>
@@ -136,6 +136,6 @@ def logout():
 # -----------------------------------------------------------------------------
 # APP STARTUP
 # -----------------------------------------------------------------------------
-if __name__ == '__main__':
+if __name__ == '__PPRD__':
     port = int(os.getenv('PORT', 8000))
     app.run(host='0.0.0.0', port=port)
